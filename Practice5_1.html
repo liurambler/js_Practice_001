@@ -1,0 +1,289 @@
+<html>
+
+<head>
+    <title>practice20180322</title>
+</head>
+<script type="text/javascript">
+    function flattenDepth(array, depth = 1) {
+        let result = [];
+        array.forEach(item => {
+            //(参数1, 参数2, …, 参数N) => { 函数声明 }
+            //(参数1, 参数2, …, 参数N) => 表达式（单一）
+            ////相当于：(参数1, 参数2, …, 参数N) =>{ return 表达式; }
+            let d = depth
+            if (Array.isArray(item) && d > 0) {
+                result.push(...(flattenDepth(item, --d)))
+                ////使用扩展运算符（...）拷贝数组。
+                //// bad
+                // const len = items.length;
+                // const itemsCopy = [];
+                // let i;
+
+                // for (i = 0; i < len; i++) {
+                //   itemsCopy[i] = items[i];
+                // }
+
+                //// good
+                // const itemsCopy = [...items];
+            } else {
+                result.push(item)
+            }
+        })
+        return result
+    }
+    console.log(flattenDepth([1, [2, [3, [4]], 5]])) // [ 1, 2, [ 3, [ 4 ] ], 5 ]
+    console.log(flattenDepth([1, [2, [3, [4]], 5]], 2)) // [ 1, 2, 3, [ 4 ], 5 ]
+    console.log(flattenDepth([1, [2, [3, [4]], 5]], 100)) // [ 1, 2, 3, 4, 5 ]
+
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+    function curry(func) {
+        var l = func.length
+        return function curried() {
+            var args = [].slice.call(arguments)
+            //call()的作用和 apply() 方法类似，只有一个区别，就是call()方法接受的是若干个参数的列表，而apply()方法接受的是一个包含多个参数的数组。
+            if (args.length < l) {
+                return function () {
+                    var argsInner = [].slice.call(arguments) //arguments 是属于函数内部的变量，其值是函数参数列表，一个类数组对象
+                    //你不可能用 arguments.slice() 这样的形式调用，因为 arguments 本身还是一个非数组对象，只是像数组。这个时候你想到了 .call 方法，这个方法让你可以自定义调用函数的内部 this 指向哪里，之前说过，默认是指向调用这个函数的对象。
+                    // Array.prototype.slice.call(arguments)
+                    // // output:
+                    // ['hello', 'world']
+                    // 这样你就得到了一个真正的参数数组了，而 .slice 除了通过 Array.prototype 访问当然还可以通过对象直接量访问:
+                    // [].slice.call(arguments)
+                    return curried.apply(this, args.concat(argsInner)) //concat() 方法将一个或多个字符串与原字符串连接合并，形成一个新的字符串并返回。
+                }
+            } else {
+                return func.apply(this, args)
+            }
+        }
+    }
+
+    var f = function (a, b, c) {
+        return console.log([a, b, c])
+    };
+
+    var curried = curry(f)
+    curried(1)(2)(3) // => [1, 2, 3]
+    curried(1, 2)(3) // => [1, 2, 3]
+    curried(1, 2, 3) // => [1, 2, 3]
+    //
+    // curried(1,2)(2)
+
+
+
+    // function curry(fn) {
+    //     var args = [];
+    //     for (var i = 1; i < arguments.length; i++) {
+    //         args.push(arguments[i]);
+    //     }
+    //     return function () {
+    //         for (var i
+    //             = 0; i < arguments.length; i++) {
+    //             args.push(arguments[i]);
+    //         }
+    //         return fn.apply(window, args);
+    //     }
+    // }
+
+    function debounce(func, wait) {
+        var timer
+        return function () {
+            var context = this
+            var args = arguments
+            clearTimeout(timer)
+            timer = setTimeout(function () {
+                func.apply(context, args)
+            }, wait)
+        }
+    }
+
+    function debounce(func, wait, leading, trailing) {
+        var timer, lastCall = 0,
+            flag = true
+        return function () {
+            var context = this
+            var args = arguments
+            var now = +new Date()
+            if (now - lastCall < wait) {
+                flag = false
+                lastCall = now
+            } else {
+                flag = true
+            }
+            if (leading && flag) {
+                lastCall = now
+                return func.apply(context, args)
+            }
+            if (trailing) {
+                clearTimeout(timer)
+                timer = setTimeout(function () {
+                    flag = true
+                    func.apply(context, args)
+                }, wait)
+            }
+        }
+    }
+    //每次记录上次调用的时间，与现在的时间对比，小于间隔的话，第一次执行后之后就不会执行，大于间隔或在间隔时间后调用了，则重置 flag，可以与上面那个基本版的对比着看。
+
+    function throttle(func, wait) {
+        var timer
+        return function () {
+            var context = this
+            var args = arguments
+            if (!timer) {
+                timer
+                    = setTimeout(function () {
+                        timer = null func.apply(context, args)
+                    }, wait)
+            }
+        }
+    }
+
+    function throttle(func, wait, leading, trailing) {
+        var timer, lastCall = 0,
+            flag = true
+        return function () {
+            var context = this
+            var args = arguments
+            var now = +new Date()
+            flag = now - lastCall > wait
+            if (leading && flag) {
+                lastCall = now
+                return func.apply(context, args)
+            }
+            if (!timer && trailing &&
+                !(flag && leading)) {
+                timer = setTimeout(function () {
+                    timer = null lastCall = +new Date() func.apply(context, args)
+                }, wait)
+            } else {
+                lastCall = now
+            }
+        }
+    }
+
+
+    //拷贝
+    //浅拷贝
+    //拷贝原对象的引用，这是最简单的浅拷贝。
+    // 对象
+    var o1 = {
+        a: 1
+    };
+    var o2 = o1;
+
+    console.log(o1 === o2); // =>true
+    o2.a = 2;
+    console.log(o1.a); // => 2
+
+    // 数组
+    var o1 = [1, 2, 3];
+    var o2 = o1;
+
+    console.log(o1 === o2); // => true
+    o2.push(4);
+    console.log(o1); // => [1,2,3,4]
+
+    //拷贝原对象的实例，但是对其内部的引用类型值，拷贝的是其引用，常用的就是如jquey中的$.extend({}, obj); Array.prototype.slice()和Array.prototype.concat()都会返回一个数组或者对象的浅拷贝，举个例子：
+    var o1 = ['darko', {
+        age: 22
+    }];
+    var o2 = o1.slice(); // 根据Array.prototype.slice()的特性，这里会返回一个o1的浅拷贝对象
+
+    console.log(o1 === o2); // => false，说明o2拷贝的是o1的一个实例
+
+    o2[0] = 'lee';
+    console.log(o1[0]); // => "darko" o1和o2内部包含的基本类型值，复制的是其实例，不会相互影响
+
+    o2[1].age = 23;
+    console.log(o1[1].age); // =>23 o1和o2内部包含的引用类型值，复制的是其引用，会相互影响
+
+    // 浅拷贝实现，仅供参考
+    function shallowClone(source) {
+        if (!source || typeof source !== 'object') {
+            throw new Error('error arguments');
+        }
+        var targetObj = source.constructor === Array ? [] : {};
+        for (var keys in source) {
+            if (source.hasOwnProperty(keys)) {
+                targetObj[keys] = source[keys];
+            }
+        }
+        return targetObj;
+    }
+
+    //深拷贝
+    // 深拷贝也就是拷贝出一个新的实例，新的实例和之前的实例互不影响，深拷贝的实现有几种方法，首先我们可以借助jQuery，lodash等第三方库完成一个深拷贝实例。
+    //在jQuery中可以通过添加一个参数来实现递归extend，调用$.extend(true, {}, ...)就可以实现一个深拷贝。
+
+    // 我们也可以自己实现一个深拷贝的函数，通常有两种方式，一种就是用递归的方式来做，还有一种是利用JSON.stringify和JSON.parse来做，这两种方式各有优劣，先来看看递归的方法怎么做。
+
+    // 递归实现一个深拷贝
+    function deepClone(source) {
+        if (!source || typeof source !== 'object') {
+            throw new Error('error arguments', 'shallowClone');
+        }
+        var targetObj = source.constructor === Array ? [] : {};
+        for (var keys in source) {
+            if (source.hasOwnProperty(keys)) {
+                if (source[keys] && typeof source[keys] === 'object') {
+                    targetObj[keys] = source[keys].constructor === Array ? [] : {};
+                    targetObj[keys] = deepClone(source[keys]);
+                } else {
+                    targetObj[keys] = source[keys];
+                }
+            }
+        }
+        return targetObj;
+    }
+    // test example
+    var o1 = {
+        arr: [1, 2, 3],
+        obj: {
+            key: 'value'
+        },
+        func: function () {
+            return 1;
+        }
+    };
+    var o3 = deepClone(o1);
+    console.log(o3 === o1); // => false
+    console.log(o3.obj === o1.obj); // => false
+    console.log(o2.func === o1.func); // => true
+
+    // 利用JSON序列化实现一个深拷贝
+    function deepClone(source) {
+        return JSON.parse(JSON.stringify(source));
+    }
+    var o1 = {
+        arr: [1, 2, 3],
+        obj: {
+            key: 'value'
+        },
+        func: function () {
+            return 1;
+        }
+    };
+    var o2 = deepClone(o1);
+    console.log(o2); // => {arr: [1,2,3], obj: {key: 'value'}}
+</script>
+
+<body>
+    <h1>数组扁平化</h1>
+    <h1>柯里化</h1>
+    <p>一句话解释就是参数够了就执行，参数不够就返回一个函数，之前的参数存起来，直到够了为止。</p>
+    <p>.apply还是不太懂，需要再看</p>
+    <h1>防抖</h1>
+    <h1>节流</h1>
+    <p>不管怎么触发，都是按照指定的间隔来执行，</p>
+    <h1>对象拷贝</h1>
+    <a>https://dorey.github.io/JavaScript-Equality-Table/</a>
+
+
+
+</body>
+
+</html>
