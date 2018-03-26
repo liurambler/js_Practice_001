@@ -1,0 +1,51 @@
+<html>
+
+<head>
+    <title>practice20180322</title>
+</head>
+
+<body>
+    <script type="text/javascript">
+        //________________001______________
+        /**
+         * @param {number[]} nums
+         * @param {number} target
+         * @return {number[]}
+         */
+        var twoSum = function (nums, target) {
+            let output = new Array(2)
+            nums.some(function (start) {
+                let x = target - start;
+                output[0] = nums.indexOf(start)
+                output[1] = nums.indexOf(x, output[0] + 1)
+                if (output[1] > 0) {
+                    return (true)
+                }
+            })
+            return (output)
+        };
+
+        //________________001______________
+
+
+        //数组去重
+        function arrayUnique(target) {
+            var result = [target[0]];
+            var temp = {};
+            temp[target[0]] = true;
+            for (var i = 1, targetLen = target.length; i < targetLen; i++) {
+                if (typeof temp[target[i]] === 'undefined') {
+                    result.push(target[i]);
+                    temp[target[i]] = true;
+                }
+            }
+            return result;
+        }
+        //________________002______________
+
+
+        //________________002______________
+    </script>
+</body>
+
+</html>
