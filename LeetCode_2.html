@@ -128,44 +128,46 @@
         })();
 
 
-        const l1=[5,6,4],
-            l2=[2,4,3];
+    const l1 = [5, 6, 4],
+        l2 = [2, 4, 3];
 
-        addTwoNumbers = function(l1, l2) {
-            let l = Math.max(l1.length, l2.length);
+    addTwoNumbers = function (l1, l2) {
+        let l = Math.max(l1.length, l2.length);
 
 
 
-            function get(arr, n) {
-                if (n < arr.length) {
-                    return arr[n]
-                } else {
-                    return 0
-                }
-            };
-
-            let r = [0],
-                extra;
-
-            for (i = 0; i < l; i++) {
-                x1 = get(l1, i);
-                x2 = get(l2, i)
-                key = x1 + x2;
-
-                if((r[i] +x1+x2)<10){
-                    r[i] = r[i] + (x1+x2);
-                    if(i<l-1){
-                        r.push(0);
-                    }
-                }else{
-                    extra = parseInt((r[i] +x1+x2)/10);
-                    r.push(extra);
-                    r[i] = r[i] +x1+x2-10*extra;
-                };
+        function get(arr, n) {
+            if (n < arr.length) {
+                return arr[n]
+            } else {
+                return 0
             }
-            console.log(r);
         };
-        addTwoNumbers(l1, l2);
+
+        let r = [0],
+            extra;
+
+        for (i = 0; i < l; i++) {
+            x1 = get(l1, i);
+            x2 = get(l2, i)
+            key = x1 + x2;
+
+            if ((r[i] + x1 + x2) < 10) {
+                r[i] = r[i] + (x1 + x2);
+                if (i < l - 1) {
+                    r.push(0);
+                }
+            } else {
+                extra = parseInt((r[i] + x1 + x2) / 10);
+                r.push(extra);
+                r[i] = r[i] + x1 + x2 - 10 * extra;
+            };
+        }
+        console.log(r);
+    };
+    addTwoNumbers(l1, l2); 
+
+
     </script>
 </body>
 
